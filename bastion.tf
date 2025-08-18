@@ -42,6 +42,39 @@ resource "aws_security_group_rule" "bastion_egress_all" {
   security_group_id = aws_security_group.bastion.id
 }
 
+
+# Security Group for resources that allow SSH from Bastion
+resource "aws_security_group" "bastion_ssh_access" {
+  name_prefix = "${var.project_name}-${var.environment}-bastion-ssh-"
+  description = "Allow SSH access from Bastion Host"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name        = "${var.project_name}-${var.environment}-bastion-ssh-sg"
+    Environment = var.environment
+    Project     = var.project_name
+    ManagedBy   = "terraform"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# Allow SSH from Bastion Host
+resource "aws_security_group_rule" "allow_ssh_from_bastion" {
+  type                     = "ingress"
+  description              = "SSH access from Bastion Host"
+  from_port                = 22
+  to_port                  = 22
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.bastion_ssh_access.id
+}
+
+
+
+
 # Data source for AMI
 data "aws_ami" "amazon_linux" {
   most_recent = true

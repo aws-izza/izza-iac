@@ -16,6 +16,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.27"
     }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.12"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.1"
@@ -28,10 +32,26 @@ provider "aws" {
 }
 
 # EKS 클러스터 생성 후 활성화할 데이터 소스들
-# data "aws_eks_cluster" "cluster" {
-#   name = module.eks.cluster_name
-# }
+data "aws_eks_cluster" "cluster" {
+  name = module.eks.cluster_name
+}
 
-# data "aws_eks_cluster_auth" "cluster" {
-#   name = module.eks.cluster_name
-# }
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.eks.cluster_name
+}
+
+# Kubernetes Provider 설정
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+}
+
+# Helm Provider 설정
+provider "helm" {
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.cluster.token
+  }
+}

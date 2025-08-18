@@ -41,7 +41,7 @@ module "vpc_endpoints" {
   ]
 
   endpoints = {
-    # S3 Gateway 엔드포인트 (Private Route Table에만 연결)
+
     s3 = {
       service         = "s3"
       service_type    = "Gateway"

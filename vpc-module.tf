@@ -14,10 +14,10 @@ module "vpc" {
   private_subnets = ["10.0.128.0/20", "10.0.144.0/20"]
   public_subnets  = ["10.0.0.0/20", "10.0.16.0/20"]
 
-  # NAT Gateway 설정 (비활성화 - 기존 NAT Gateway 사용)
-  enable_nat_gateway     = false # NAT Gateway 생성 비활성화
+  # NAT Gateway 설정 (단일 NAT Gateway 사용)
+  enable_nat_gateway     = true # NAT Gateway 생성 활성화
   enable_vpn_gateway     = false
-  single_nat_gateway     = false
+  single_nat_gateway     = true # 모든 private subnet이 하나의 NAT Gateway 공유
   one_nat_gateway_per_az = false
 
   # DNS 설정
@@ -37,7 +37,7 @@ module "vpc" {
   }
 
   private_subnet_tags = {
-    Name                             = "izza-private-subnet"
+    Name                              = "izza-private-subnet"
     "kubernetes.io/role/internal-elb" = "1"
     "kubernetes.io/cluster/eks-izza"  = "owned"
   }
